@@ -1,7 +1,7 @@
 package model.data;
 
 import org.jooq.DSLContext;
-import org.jooq.DataType;
+import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
 import java.sql.Connection;
@@ -13,7 +13,7 @@ public class DBGenerator {
 
     public static void iniciarBD(String nombreBD) throws ClassNotFoundException {
         Connection connection = DBConnector.connection("", "root", "");
-        DSLContext create = DSL.using(connection);
+        DSLContext create = DSL.using(connection, SQLDialect.H2);
         crearBaseDato(create, nombreBD);
         create = actualizarConexion(connection, nombreBD);
         crearTablaEleccion(create);
@@ -28,67 +28,68 @@ public class DBGenerator {
 
     public static DSLContext conectarBD(String nombre) throws ClassNotFoundException {
         Connection connection = DBConnector.connection(nombre, "root", "");
-        return DSL.using(connection);
+        return DSL.using(connection, SQLDialect.H2);
     }
 
     private static void crearBaseDato(DSLContext create, String nombreBD) {
         create.createDatabaseIfNotExists(nombreBD).execute();
     }
 
-    private static DSLContext actualizarConexion(Connection connection, String nombreBD) {
+    private static DSLContext actualizarConexion(Connection connection, String nombreBD) throws ClassNotFoundException {
         DBConnector.closeConnection();
         connection = DBConnector.connection(nombreBD, "root", "");
-        return DSL.using(connection);
+        return DSL.using(connection, SQLDialect.H2);
     }
 
     private static void crearTablaEleccion(DSLContext create) {
-        create.createTableIfNotExists("Eleccion")
-                .column("id", INTEGER.identity(true))
-                .column("nombre", VARCHAR(100))
-                .column("fecha", DATE)
-                .column("lugar", VARCHAR(100))
+        create.createTableIfNotExists(name("Eleccion"))
+                .column(name("id"), INTEGER.identity(true))
+                .column(name("nombre"), VARCHAR(100))
+                .column(name("fecha"), DATE)
+                .column(name("lugar"), VARCHAR(100))
                 .constraint(primaryKey("id"))
                 .execute();
     }
 
     private static void crearTablaCandidato(DSLContext create) {
-        create.createTableIfNotExists("Candidato")
-                .column("id", INTEGER.identity(true))
-                .column("nombre_completo", VARCHAR(100))
-                .column("partido_politico", VARCHAR(100))
-                .column("cargo", VARCHAR(50))
+        create.createTableIfNotExists(name("Candidato"))
+                .column(name("id"), INTEGER.identity(true))
+                .column(name("nombre_completo"), VARCHAR(100))
+                .column(name("partido_politico"), VARCHAR(100))
+                .column(name("cargo"), VARCHAR(50))
                 .constraint(primaryKey("id"))
                 .execute();
     }
 
     private static void crearTablaVotante(DSLContext create) {
-        create.createTableIfNotExists("Votante")
-                .column("id", INTEGER.identity(true))
-                .column("nombre_completo", VARCHAR(100))
-                .column("email", VARCHAR(100))
-                .column("direccion", VARCHAR(100))
+        create.createTableIfNotExists(name("Votante"))
+                .column(name("id"), INTEGER.identity(true))
+                .column(name("nombre_completo"), VARCHAR(100))
+                .column(name("email"), VARCHAR(100))
+                .column(name("direccion"), VARCHAR(100))
                 .constraint(primaryKey("id"))
                 .execute();
     }
 
     private static void crearTablaVoto(DSLContext create) {
-        create.createTableIfNotExists("Voto")
-                .column("id", INTEGER.identity(true))
-                .column("votante_id", INTEGER)
-                .column("candidato_id", INTEGER)
-                .column("eleccion_id", INTEGER)
-                .column("fecha", DATE)
+        create.createTableIfNotExists(name("Voto"))
+                .column(name("id"), INTEGER.identity(true))
+                .column(name("votante_id"), INTEGER)
+                .column(name("candidato_id"), INTEGER)
+                .column(name("eleccion_id"), INTEGER)
+                .column(name("fecha"), DATE)
                 .constraint(primaryKey("id"))
-                .constraint(foreignKey("votante_id").references("Votante", "id"))
-                .constraint(foreignKey("candidato_id").references("Candidato", "id"))
-                .constraint(foreignKey("eleccion_id").references("Eleccion", "id"))
+                .constraint(foreignKey("votante_id").references(name("Votante"), name("id")))
+                .constraint(foreignKey("candidato_id").references(name("Candidato"), name("id")))
+                .constraint(foreignKey("eleccion_id").references(name("Eleccion"), name("id")))
                 .execute();
     }
 
     private static void relacionarTabla(DSLContext create, String nombreTabla, String claveForanea, String nombreTablaRelacion) {
-        create.alterTableIfExists(nombreTabla)
-                .addConstraint(foreignKey(claveForanea).references(nombreTablaRelacion, "id"))
+        create.alterTable(name(nombreTabla))
+                .add(foreignKey(name(claveForanea)).references(name(nombreTablaRelacion), name("id")))
                 .execute();
     }
 }
+
 

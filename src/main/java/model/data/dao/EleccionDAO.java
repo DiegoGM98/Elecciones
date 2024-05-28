@@ -2,20 +2,19 @@ package model.data.dao;
 
 import model.Eleccion;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
 import org.jooq.Result;
-import org.jooq.Table;
-import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jooq.impl.DSL.*;
+import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.table;
 
 public class EleccionDAO {
 
     public static void agregarEleccion(DSLContext query, Eleccion eleccion) {
-        Table tablaEleccion = table(name("Eleccion"));
-        query.insertInto(tablaEleccion,
+        query.insertInto(table("Eleccion"),
                         field("nombre"),
                         field("fecha"),
                         field("lugar"))
@@ -25,16 +24,17 @@ public class EleccionDAO {
                 .execute();
     }
 
-    public static void modificarEleccion(DSLContext query, int id, String columnaTabla, Object dato) {
-        query.update(table("Eleccion"))
-                .set(field(columnaTabla), dato)
-                .where(field("id").eq(id))
-                .execute();
+    public static boolean validarExistenciaEleccion(DSLContext query, String columnaTabla, Object dato) {
+        Record1<Integer> resultado = query.selectCount()
+                .from(table("Eleccion"))
+                .where(field(columnaTabla).eq(dato))
+                .fetchOne();
+        return resultado != null && resultado.component1() > 0;
     }
 
-    public static List<Eleccion> obtenerEleccion(DSLContext query, String columnaTabla, Object dato) {
-        Result resultados = query.select().from(table("Eleccion"))
-                .where(field(columnaTabla).eq(dato))
+    public static List<Eleccion> obtenerTodasElecciones(DSLContext query) {
+        Result resultados = query.select()
+                .from(table("Eleccion"))
                 .fetch();
         return obtenerListaElecciones(resultados);
     }
@@ -57,4 +57,5 @@ public class EleccionDAO {
         return elecciones;
     }
 }
+
 
