@@ -47,7 +47,9 @@ public class DBGenerator {
                 .column(name("nombre"), VARCHAR(100))
                 .column(name("fecha"), DATE)
                 .column(name("lugar"), VARCHAR(100))
-                .constraint(primaryKey("id"))
+                .constraints(
+                        primaryKey(name("id"))
+                )
                 .execute();
     }
 
@@ -57,7 +59,9 @@ public class DBGenerator {
                 .column(name("nombre_completo"), VARCHAR(100))
                 .column(name("partido_politico"), VARCHAR(100))
                 .column(name("cargo"), VARCHAR(50))
-                .constraint(primaryKey("id"))
+                .constraints(
+                        primaryKey(name("id"))
+                )
                 .execute();
     }
 
@@ -67,7 +71,9 @@ public class DBGenerator {
                 .column(name("nombre_completo"), VARCHAR(100))
                 .column(name("email"), VARCHAR(100))
                 .column(name("direccion"), VARCHAR(100))
-                .constraint(primaryKey("id"))
+                .constraints(
+                        primaryKey(name("id"))
+                )
                 .execute();
     }
 
@@ -78,10 +84,12 @@ public class DBGenerator {
                 .column(name("candidato_id"), INTEGER)
                 .column(name("eleccion_id"), INTEGER)
                 .column(name("fecha"), DATE)
-                .constraint(primaryKey("id"))
-                .constraint(foreignKey("votante_id").references(name("Votante"), name("id")))
-                .constraint(foreignKey("candidato_id").references(name("Candidato"), name("id")))
-                .constraint(foreignKey("eleccion_id").references(name("Eleccion"), name("id")))
+                .constraints(
+                        primaryKey(name("id")),
+                        foreignKey(name("votante_id")).references(name("Votante"), name("id")),
+                        foreignKey(name("candidato_id")).references(name("Candidato"), name("id")),
+                        foreignKey(name("eleccion_id")).references(name("Eleccion"), name("id"))
+                )
                 .execute();
     }
 
@@ -91,5 +99,4 @@ public class DBGenerator {
                 .execute();
     }
 }
-
 
